@@ -1,11 +1,11 @@
-module Auth exposing (User, onPageLoad)
+module Auth exposing (User, onPageLoad, viewLoadingPage)
 
 import Auth.Action
 import Dict
 import Route exposing (Route)
 import Route.Path
 import Shared
-import View
+import View exposing (View)
 
 import Auth.Auth0
 
@@ -35,3 +35,8 @@ onPageLoad shared route =
                                 ]
                         , hash = Nothing
                         }
+
+
+viewLoadingPage : Shared.Model -> Route () -> View Never
+viewLoadingPage shared route =
+    View.fromString "Loading..."

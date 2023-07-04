@@ -1,4 +1,4 @@
-module Layouts.Navigation exposing (Model, Msg, Settings, layout)
+module Layouts.Navigation exposing (Model, Msg, Props, layout)
 
 import Auth
 import Colors.Alpha exposing (black, blue, lightgrey, lightblue)
@@ -15,18 +15,18 @@ import Shared
 import View exposing (View)
 
 
-type alias Settings =
+type alias Props =
     { title : String
     , user : Auth.User
     }
 
 
-layout : Settings -> Shared.Model -> Route () -> Layout Model Msg mainMsg
-layout settings shared route =
+layout : Props -> Shared.Model -> Route () -> Layout () Model Msg contentMsg
+layout props shared route =
     Layout.new
         { init = init
         , update = update
-        , view = view settings route
+        , view = view props route
         , subscriptions = subscriptions
         }
 
@@ -73,14 +73,14 @@ subscriptions model =
 
 
 view :
-    Settings
+    Props
     -> Route ()
-    -> { fromMsg : Msg -> mainMsg
-       , content : View mainMsg
+    -> { content : View contentMsg
        , model : Model
+       , toContentMsg : Msg -> contentMsg
        }
-    -> View mainMsg
-view settings route { fromMsg, model, content } =
+    -> View contentMsg
+view settings route { model, content, toContentMsg } =
     { title = content.title
     , attributes = []
     , element =
@@ -89,7 +89,7 @@ view settings route { fromMsg, model, content } =
                 { route = route
                 , user = settings.user
                 }
-                |> Element.map fromMsg
+                |> Element.map toContentMsg
             , viewMainContent
                 { title = settings.title
                 , content = content

@@ -7,7 +7,7 @@ port module Shared exposing
 
 
 import Effect exposing (Effect)
-import Json.Decode as Decode
+import Json.Decode exposing (Decoder)
 import Json.Decode.Pipeline exposing (optional, required)
 import Route exposing (Route)
 import Route.Path
@@ -29,25 +29,25 @@ type alias Flags =
     }
 
 
-decoder : Decode.Decoder Flags
+decoder : Json.Decode.Decoder Flags
 decoder =
-    Decode.succeed Flags
-        |> optional "user" (Decode.map Just userDecoder) Nothing
-        |> required "backendUri" Decode.string
+    Json.Decode.succeed Flags
+        |> optional "user" (Json.Decode.map Just userDecoder) Nothing
+        |> required "backendUri" Json.Decode.string
 
-userDecoder : Decode.Decoder Auth.Auth0.LoggedInUser
+userDecoder : Json.Decode.Decoder Auth.Auth0.LoggedInUser
 userDecoder =
-    Decode.succeed Auth.Auth0.LoggedInUser
+    Json.Decode.succeed Auth.Auth0.LoggedInUser
         |> required "profile" profileDecoder
-        |> required "token" Decode.string
+        |> required "token" Json.Decode.string
 
 
-profileDecoder : Decode.Decoder Auth.Auth0.UserProfile
+profileDecoder : Json.Decode.Decoder Auth.Auth0.UserProfile
 profileDecoder =
-    Decode.succeed Auth.Auth0.UserProfile
-        |> required "email" Decode.string
-        |> required "email_verified" Decode.bool
-        |> required "picture" Decode.string
+    Json.Decode.succeed Auth.Auth0.UserProfile
+        |> required "email" Json.Decode.string
+        |> required "email_verified" Json.Decode.bool
+        |> required "picture" Json.Decode.string
 
 
 
@@ -58,7 +58,7 @@ type alias Model =
     Shared.Model.Model
 
 
-init : Result Decode.Error Flags -> Route () -> ( Model, Effect Msg )
+init : Result Json.Decode.Error Flags -> Route () -> ( Model, Effect Msg )
 init flagsResult route =
     let
         flags : Flags

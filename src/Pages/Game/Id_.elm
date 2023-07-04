@@ -33,13 +33,11 @@ page user shared route =
         |> Page.withLayout (toLayout user route.params.id)
 
 
-toLayout : Auth.User -> String -> Model -> Layouts.Layout
+toLayout : Auth.User -> String -> Model -> Layouts.Layout Msg
 toLayout user id model =
     Layouts.Navigation
-        { navigation =
-            { title = ("Game " ++ id)
-            , user = user
-            }
+        { title = ("Game " ++ id)
+        , user = user
         }
 
 

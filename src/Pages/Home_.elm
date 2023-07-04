@@ -24,13 +24,11 @@ page user shared route =
         |> Page.withLayout (toLayout user)
 
 
-toLayout : Auth.User -> Model -> Layouts.Layout
+toLayout : Auth.User -> Model -> Layouts.Layout Msg
 toLayout user model =
     Layouts.Navigation
-        { navigation =
-            { title = "Home"
-            , user = user
-            }
+        { title = "Home"
+        , user = user
         }
 
 
