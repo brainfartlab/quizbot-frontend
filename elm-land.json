@@ -8,7 +8,7 @@
       "QUIZ_API_URI",
       "AUTH0_TENANT",
       "AUTH0_CLIENT_ID",
-      "DEPLOY_PRIME_URL"
+      "URL"
     ],
     "html": {
       "attributes": {
