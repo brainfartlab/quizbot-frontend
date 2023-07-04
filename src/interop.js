@@ -18,7 +18,7 @@ export const onReady = ({ env, app }) => {
     domain: env.AUTH0_TENANT,
     clientID: env.AUTH0_CLIENT_ID,
     responseType: 'token',
-    redirectUri: 'http://localhost:1234'
+    redirectUri: env.URL,
   });
 
   if (app.ports && app.ports.auth0authorize) {
