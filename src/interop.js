@@ -1,8 +1,6 @@
 export const flags = ({ env }) => {
   var profile = localStorage.profile
   var token = localStorage.token
-  console.log("Loading...")
-  console.log(env)
 
   return {
     user: (profile && token) ? {
