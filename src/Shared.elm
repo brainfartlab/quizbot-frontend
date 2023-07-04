@@ -63,7 +63,7 @@ init flagsResult route =
     let
         flags : Flags
         flags =
-            (Debug.log "flags" flagsResult)
+            flagsResult
                 |> Result.withDefault { user = Nothing, backendUri = "" }
     in
     ( { authModel = (Auth.Authentication.init Effect.auth0authorize Effect.auth0logout flags.user)
