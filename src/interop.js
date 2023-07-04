@@ -12,6 +12,7 @@ export const flags = ({ env }) => {
 }
 
 export const onReady = ({ env, app }) => {
+  console.log(env);
   var webAuth = new auth0.WebAuth({
     domain: env.AUTH0_TENANT,
     clientID: env.AUTH0_CLIENT_ID,
