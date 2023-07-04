@@ -19,11 +19,21 @@ onPageLoad : Shared.Model -> Route () -> Auth.Action.Action User
 onPageLoad shared route =
     case shared.authModel.state of
         Auth.Auth0.LoggedIn user ->
-            Auth.Action.loadPageWithUser user
+            case route.path of
+                Route.Path.Callback ->
+                    Auth.Action.pushRoute
+                        { path = Route.Path.Home_
+                        , query =
+                            Dict.empty
+                        , hash = Nothing
+                        }
+
+                _ ->
+                    Auth.Action.loadPageWithUser user
 
         Auth.Auth0.LoggedOut ->
             case route.path of
-                Route.Path.Home_ ->
+                Route.Path.Callback ->
                     Auth.Action.showLoadingPage View.none
 
                 _ ->
