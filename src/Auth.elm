@@ -39,4 +39,4 @@ onPageLoad shared route =
 
 viewLoadingPage : Shared.Model -> Route () -> View Never
 viewLoadingPage shared route =
-    View.fromString "Loading..."
+    View.none
