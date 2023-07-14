@@ -14,7 +14,10 @@ import Route exposing (Route)
 import Http
 import Layouts
 import Page exposing (Page)
+import Process
 import Shared
+import Task
+import Time
 import View exposing (View)
 
 import Api exposing (Error, ServiceError)
@@ -111,6 +114,7 @@ type Msg
     | FinishGame
         { game : Game
         }
+    | ReloadGame Game Time.Posix
 
 
 update : Auth.User -> Shared.Model -> Msg -> Model -> ( Model, Effect Msg )
@@ -120,20 +124,25 @@ update user shared msg model =
             ( Loaded
                 { gameData = Api.Success game
                 }
-            , if isCompleted game then
-                Api.Question.list
-                    { onResponse = ApiQuestionListResponded { game = game }
-                    , backendUri = shared.backendUri
-                    , token = user.token
-                    , gameId = game.id
-                    }
-              else
-                Api.Question.ask
-                    { onResponse = ApiQuestionAskResponded { game = game }
-                    , backendUri = shared.backendUri
-                    , token = user.token
-                    , gameId = game.id
-                    }
+            , case game.status of
+                Api.Game.PENDING ->
+                    Effect.none
+
+                Api.Game.READY ->
+                    Api.Question.ask
+                        { onResponse = ApiQuestionAskResponded { game = game }
+                        , backendUri = shared.backendUri
+                        , token = user.token
+                        , gameId = game.id
+                        }
+
+                Api.Game.FINISHED ->
+                    Api.Question.list
+                        { onResponse = ApiQuestionListResponded { game = game }
+                        , backendUri = shared.backendUri
+                        , token = user.token
+                        , gameId = game.id
+                        }
             )
 
         ApiGameResponded (Err error) ->
@@ -289,13 +298,38 @@ update user shared msg model =
                 }
             )
 
+        ReloadGame game _ ->
+            ( model
+            , Api.Game.get
+                { onResponse = ApiGameResponded
+                , backendUri = shared.backendUri
+                , token = user.token
+                , id = game.id
+                }
+            )
+
 
 -- SUBSCRIPTIONS
 
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    Sub.none
+    case model of
+        Loaded { gameData } ->
+            case gameData of
+                Api.Success game ->
+                    case game.status of
+                        Api.Game.PENDING ->
+                            Time.every 30000 (ReloadGame game)
+
+                        _ ->
+                            Sub.none
+
+                _ ->
+                    Sub.none
+
+        _ ->
+            Sub.none
 
 
 
@@ -360,12 +394,24 @@ viewGame game =
         shortHash : String
         shortHash =
             String.slice 0 8 game.id
+
+        status : String
+        status =
+            case game.status of
+                Api.Game.PENDING ->
+                    "creating ... refresh in 30 seconds"
+
+                Api.Game.READY ->
+                    "ready"
+
+                Api.Game.FINISHED ->
+                    "finished"
     in
     el
         [ Element.paddingXY 0 10
         , Element.centerX
         ]
-        (Element.text shortHash)
+        (Element.text (shortHash ++ " (" ++ status ++ ")"))
 
 
 viewLoadedQuestion : { game : Game } -> Api.Data Question -> Choice -> Element Msg
@@ -619,6 +665,11 @@ viewFeedback { game } feedback =
 
 
 -- HELPERS
+
+
+isPending : Game -> Bool
+isPending game =
+    game.status == Api.Game.PENDING
 
 
 isCompleted : Game -> Bool
