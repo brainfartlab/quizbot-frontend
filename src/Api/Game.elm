@@ -1,5 +1,5 @@
 module Api.Game exposing
-    ( Game
+    ( Game, GameStatus(..)
     , list, get, post
     )
 
@@ -14,12 +14,19 @@ import Set exposing (Set)
 import Time
 
 
+type GameStatus
+    = PENDING
+    | READY
+    | FINISHED
+
+
 type alias Game =
     { id : String
     , keywords : Set String
-    , questionsCount : Int
+    , questionsAnswered : Int
     , questionsLimit : Int
     , creationTime : Time.Posix
+    , status: GameStatus
     }
 
 
@@ -121,17 +128,38 @@ authHeader token =
 gameDecoder : Decoder Game
 gameDecoder =
     let
-        toDecoder : String -> Set String -> Int -> Int -> Int -> Decoder Game
-        toDecoder id keywords questionsCount questionsLimit creationTime =
-            Decode.succeed (Game id keywords questionsCount questionsLimit (Time.millisToPosix creationTime))
+        toDecoder : String -> Set String -> Int -> Int -> Int -> GameStatus -> Decoder Game
+        toDecoder id keywords questionsCount questionsLimit creationTime gameStatus =
+            Decode.succeed (Game id keywords questionsCount questionsLimit (Time.millisToPosix creationTime) gameStatus)
     in
     Decode.succeed toDecoder
         |> required "id" Decode.string
         |> required "keywords" (set Decode.string)
-        |> required "questions_count" Decode.int
+        |> required "questions_answered" Decode.int
         |> required "questions_limit" Decode.int
         |> required "creation_time" Decode.int
+        |> required "status" gameStatusDecoder
         |> resolve
+
+gameStatusDecoder : Decoder GameStatus
+gameStatusDecoder =
+    Decode.string
+        |> Decode.andThen
+            (\status ->
+                case status of
+                    "PENDING" ->
+                        Decode.succeed PENDING
+
+                    "READY" ->
+                        Decode.succeed READY
+
+                    "FINISHED" ->
+                        Decode.succeed FINISHED
+
+                    _ ->
+                        Decode.fail ("Unknown status: " ++ status)
+            )
+
 
 gamesDecoder : Decoder (List Game)
 gamesDecoder =

@@ -238,7 +238,11 @@ viewStartNewGame model =
                 { onChange = KeywordUpdated
                 , text = model.keywordField
                 , placeholder = Just <| Input.placeholder [] <| Element.text "keyword"
-                , label = Input.labelHidden "Keywords"
+                , label = Input.labelAbove
+                    [ Font.size 12
+                    , Element.padding 5
+                    ]
+                    (Element.text "Type a keyword and press 'ENTER' to add, you can have between 1 and 5 keywords")
                 }
             , if Set.isEmpty model.keywords then
                 Input.button
@@ -367,7 +371,13 @@ viewGame timeZone game =
                 , Font.bold
                 , Font.color (white 1)
                 ]
-                (Element.text (String.fromInt game.questionsCount ++ " / " ++ String.fromInt game.questionsLimit))
+                ( case game.status of
+                    Api.Game.PENDING ->
+                        Element.text "CREATING"
+
+                    _ ->
+                        Element.text (String.fromInt game.questionsAnswered ++ " / " ++ String.fromInt game.questionsLimit)
+                )
             ]
 
 onEnter : msg -> Element.Attribute msg
@@ -413,6 +423,11 @@ findFormError model =
 -- HELPERS
 
 
+isPending : Game -> Bool
+isPending game =
+    game.status == Api.Game.PENDING
+
+
 isCompleted : Game -> Bool
 isCompleted game =
-    game.questionsCount == game.questionsLimit
+    game.questionsAnswered == game.questionsLimit

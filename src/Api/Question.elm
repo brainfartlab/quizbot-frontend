@@ -41,7 +41,7 @@ type QuestionSummary
 
 type alias Feedback =
     { result : Bool
-    , solution : Int
+    , solution : String
     , clarification : String
     }
 
@@ -139,7 +139,7 @@ answer:
     , backendUri : String
     , token : String
     , gameId : String
-    , choice : Int
+    , choice : String
     }
     -> Effect msg
 answer options =
@@ -224,11 +224,11 @@ feedbackDecoder : Decode.Decoder Feedback
 feedbackDecoder =
      Decode.succeed Feedback
         |> required "result" Decode.bool
-        |> required "solution" Decode.int
+        |> required "solution" Decode.string
         |> required "clarification" Decode.string
 
-answerEncoder : { choice : Int } -> Json.Encode.Value
+answerEncoder : { choice : String } -> Json.Encode.Value
 answerEncoder { choice } =
     Json.Encode.object
-        [ ( "choice", Json.Encode.int choice )
+        [ ( "choice", Json.Encode.string choice )
         ]

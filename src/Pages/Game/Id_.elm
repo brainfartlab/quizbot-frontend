@@ -67,7 +67,7 @@ type Model
 
 
 type Choice
-    = Choice Int
+    = Choice String
     | NoChoice
 
 
@@ -175,7 +175,7 @@ update user shared msg model =
 
         ApiQuestionAnswerResponded { game, question, choice } (Ok feedback) ->
             ( LoadedFeedback
-                { game = { game | questionsCount = game.questionsCount + 1 }
+                { game = { game | questionsAnswered = game.questionsAnswered + 1 }
                 , question = question
                 , choice = choice
                 , feedbackData = Api.Success feedback
@@ -510,17 +510,13 @@ viewOptions options choice =
                     Nothing
         , label = Input.labelAbove [ Font.size 14 ] (Element.text "Pick your choice")
         , options =
-            (List.indexedMap viewOption options)
+            (List.map viewOption options)
         }
 
 
-viewOption : Int -> String -> Input.Option Choice Msg
-viewOption zeroBasedIndex option =
-    let
-        index : Int
-        index = zeroBasedIndex + 1
-    in
-    Input.optionWith (Choice index) <| radioOption (String.fromInt index ++ ") " ++ option)
+viewOption : String -> Input.Option Choice Msg
+viewOption option =
+    Input.optionWith (Choice option) <| radioOption option
 
 
 radioOption : String -> Input.OptionState -> Element msg
@@ -585,7 +581,7 @@ viewFeedback { game } feedback =
         , if not feedback.result then
             column
                 []
-                [ Element.text ("The answer is: " ++ String.fromInt feedback.solution)
+                [ Element.text ("The answer is: " ++ feedback.solution)
                 , Element.paragraph []
                     [ Element.text feedback.clarification
                     ]
@@ -600,7 +596,7 @@ viewFeedback { game } feedback =
         , el
             [ Element.centerX
             ] <|
-            ( if game.questionsCount == game.questionsLimit then
+            ( if game.questionsAnswered == game.questionsLimit then
                 Input.button
                     [ Element.padding 10
                     , Background.color (salmon 1)
@@ -627,4 +623,4 @@ viewFeedback { game } feedback =
 
 isCompleted : Game -> Bool
 isCompleted game =
-    game.questionsCount == game.questionsLimit
+    game.questionsAnswered == game.questionsLimit
