@@ -72,35 +72,7 @@ update msg model =
     LogOut ->
       ( { model | state = Auth0.LoggedOut }, model.logOut () )
 
-userDecoder : Json.Decode.Decoder Auth0.LoggedInUser
-userDecoder =
-    Json.Decode.succeed Auth0.LoggedInUser
-        |> required "profile" profileDecoder
-        |> required "token" Json.Decode.string
-
-
-profileDecoder : Json.Decode.Decoder Auth0.UserProfile
-profileDecoder =
-    Json.Decode.succeed Auth0.UserProfile
-        |> required "email" Json.Decode.string
-        -- |> optional "email_verified" (Json.Decode.map Just Json.Decode.bool) Nothing
-        |> required "picture" Json.Decode.string
-
-rawDecoder : Json.Decode.Decoder Auth0.RawAuthenticationResult
-rawDecoder =
-    Json.Decode.succeed Auth0.RawAuthenticationResult
-        |> optional "err" (Json.Decode.map Just errDecoder) Nothing
-        |> optional "ok" (Json.Decode.map Just userDecoder) Nothing
-
-errDecoder : Json.Decode.Decoder Auth0.AuthenticationError
-errDecoder =
-    Json.Decode.succeed Auth0.AuthenticationError
-        |> optional "name" (Json.Decode.map Just Json.Decode.string) Nothing
-        |> optional "code" (Json.Decode.map Just Json.Decode.string) Nothing
-        |> required "description" Json.Decode.string
-        |> optional "statusCode" (Json.Decode.map Just Json.Decode.int) Nothing
-
-handleAuthResult : Auth0.RawAuthenticationResult -> Msg
+handleAuthResult : Json.Decode.Value -> Msg
 handleAuthResult =
   Auth0.mapResult >> AuthenticationResult
 

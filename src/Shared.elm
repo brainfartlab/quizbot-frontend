@@ -32,23 +32,8 @@ type alias Flags =
 decoder : Json.Decode.Decoder Flags
 decoder =
     Json.Decode.succeed Flags
-        |> optional "user" (Json.Decode.map Just userDecoder) Nothing
+        |> optional "user" (Json.Decode.map Just Auth.Auth0.userDecoder) Nothing
         |> required "backendUri" Json.Decode.string
-
-userDecoder : Json.Decode.Decoder Auth.Auth0.LoggedInUser
-userDecoder =
-    Json.Decode.succeed Auth.Auth0.LoggedInUser
-        |> required "profile" profileDecoder
-        |> required "token" Json.Decode.string
-
-
-profileDecoder : Json.Decode.Decoder Auth.Auth0.UserProfile
-profileDecoder =
-    Json.Decode.succeed Auth.Auth0.UserProfile
-        |> required "email" Json.Decode.string
-        -- |> optional "email_verified" (Json.Decode.map Just Json.Decode.bool) Nothing
-        |> required "picture" Json.Decode.string
-
 
 
 -- INIT
@@ -103,7 +88,7 @@ update route msg model =
 -- PORTS
 
 
-port auth0authResult : (Auth.Auth0.RawAuthenticationResult -> msg) -> Sub msg
+port auth0authResult : (Json.Decode.Value -> msg) -> Sub msg
 
 
 -- SUBSCRIPTIONS
