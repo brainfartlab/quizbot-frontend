@@ -46,7 +46,7 @@ profileDecoder : Json.Decode.Decoder Auth.Auth0.UserProfile
 profileDecoder =
     Json.Decode.succeed Auth.Auth0.UserProfile
         |> required "email" Json.Decode.string
-        |> required "email_verified" Json.Decode.bool
+        -- |> optional "email_verified" (Json.Decode.map Just Json.Decode.bool) Nothing
         |> required "picture" Json.Decode.string
 
 

@@ -59,6 +59,8 @@ export const onReady = ({ env, app }) => {
           localStorage.setItem('token', token);
         }
 
+        console.log(result);
+
         app.ports.auth0authResult.send(result);
       })
 
